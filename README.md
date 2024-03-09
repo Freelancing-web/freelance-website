@@ -127,7 +127,23 @@ SF is a platform that connects businesses with freelancers, aiming to streamline
 5. Make A new Branch The feature you are working with `git checkout -b <your-name>`
 6. after You work with you feature  make `add , commit   and push it to your branch`
 7. go to your branch and send me the link `pull request`
-8. don't merge it 
+8. don't merge it
+
+steps to contribute 
+----------------------
+1. join the organization 
+2. fork the repository 
+3. clone your own forked repo  using command `git clone <repo_url>`
+4. install required dependcies using command `npm install`
+5. get updated project features  `git pull`
+	-git pull 
+6. make your own branch `git checkout -b <branch_name>`
+7. work with your branch 
+8. push your branch to your  forked repo `git push <your_branch_name>`
+9. create pull request  `go to your forked repo the create pull request`
+10.  remember don't merge the pull request  `don't merge it ~~~~`
+11. send me the pull request you created to check and merge into the main 
+			branch  `to compare  and check conflicts  then to merge it`
 
 
-Feel free to contribute and improve the Somali Freelancing Website!
+Feel free to contribute and improve the Somali Freelancing Website! 
