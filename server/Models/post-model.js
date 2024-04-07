@@ -1,28 +1,34 @@
-import mongoose  from "mongoose";
+import mongoose from "mongoose";
 
-const postSchema  = mongoose.Schema({
-    title:{
-        type:String,
-        required:true,
+const { Schema } = mongoose;
 
-    },
-    content:{
+const postSchema = new Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  content: {
+    type: String,
+    validator: [
+      (value) => value.length < 500,
+      "Content Should be Up to 500 Character",
+    ],
+    required: true,
+  },
+  image: {
+    type: String,
 
-        type:String,
-        required:true,
-    },
-    photoUrl:{
-        type:String,
-        default:null
-    },
-    userId:{
-        type:String,
-        required:true
-    }
-
+    default: null
+  },
+  author:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'User',
+    required:true
+  }
 },{
-    timeStamps:true
-})
+    timestamps:true
+});
 
-const postModel  = mongoose.model('post',postSchema)
-export default postModel
+
+
+export const postModel  = mongoose.model('Post',postSchema)
