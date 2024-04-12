@@ -32,6 +32,14 @@ const userSchema = new Schema(
       type:String, 
       default:'freelancer'
     },
+    photoUrl:{
+      type:String,
+      default: "https://source.unsplash.com/random/200x200" || null
+    },
+    coverImg:{
+      type:String,
+      default: "https://source.unsplash.com/random/200x200" || null
+    }
     
   },
   {
@@ -54,6 +62,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.comparePassword = async function (givenPassword) {
+  console.log('password',givenPassword)
   return await bcrypt.compare(givenPassword, this.password);
 };
 

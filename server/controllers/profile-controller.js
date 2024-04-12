@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { profileInfoModel } from "../Models/profile-info-model.js";
 import cloudinary from "../config/cloud.js";
 import { ObjectId } from "mongoose";
+import { errorHandler } from "../utils/error-handler.js";
 // export const createResume = async (req, res) => {
 //     try {
 
@@ -26,71 +27,73 @@ import { ObjectId } from "mongoose";
 //   };
 
 // Controller function to create or update profile information
-export const createProfileInfo = async (req, res) => {
+export const createProfileInfo = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    let fieldsToUPdate = {
-    //   title: req.body.title,
-      bio:req.body.bio&&req.body.bio,
-      experience:{
-          jobTitle: req.body.jobTitle,
-          company: req.body.company,
-          description: req.body.description,
-          startDate: req.body.startDate,
-          endDate: req.body.endDate,
+    const { bio, skills, portfolio,profileId } = req.body;
 
-      },
-      skills: req.body.skills,
+    let fieldsToUPdate = {
+      bio ,
+      skills,
+      portfolio,
       userId,
+      
     };
 
-    const { bio, prof,skills, jobTitle, company, startDate, endDate, description } =
-      req.body;
     console.log(req.body);
 
     let result;
-    let profile = await profileInfoModel.findOne({ userId });
-    console.log("fined profile", profile);
+    let profile;
+
+    profile = await profileInfoModel.findOne({ userId:userId });
+
     if (profile) {
-      if (req.file && req.file.mimetype === "application/pdf") {
-        let encodedPdf = `data:application/pdf;base64,${req.file.buffer.toString(
-          "base64"
-        )}`;
-        result = await cloudinary.uploader.upload(encodedPdf, {
-          resource_type: "image",
-        });
-        fieldsToUPdate.resume = result?.secure_url || null;
-    }
+      if (req.file) {
+        if (req.file.mimetype === "application/pdf") {
+          const encodedPdf = `data:application/pdf;base64,${req.file.buffer.toString(
+            "base64"
+          )}`;
+          result = await cloudinary.uploader.upload(encodedPdf, {
+            resource_type: "image",
+          });
+          fieldsToUPdate.resume = result?.secure_url || null;
+        } else {
+          throw new Error("Uploaded file is not a PDF");
+        }
+      }
+    
       const updateProfile = await profileInfoModel.findByIdAndUpdate(
-        { _id:prof },
+        { _id: profileId },
         fieldsToUPdate,
         { new: true }
       );
       console.log("UPdating prf", updateProfile);
       if (!updateProfile)
-        return res.status(404).send("Can't Update Profile Info ");
+      return next(errorHandler(400,'Cant Udpate'))
 
-      return res
-        .status(200)
-        .json({ updateProfile });
+      return res.status(200).json({ updateProfile });
     }
     // If profile doesn't exist, create a new one
-    if (req.file && req.file.mimetype === "application/pdf") {
-      let encodedPdf = `data:application/pdf;base64,${req.file.buffer.toString(
-        "base64"
-      )}`;
-      result = await cloudinary.uploader.upload(encodedPdf, {
-        resource_type: "image",
-      });
-    } else {
-      // Handle error if file is not a PDF
-      throw new Error("Uploaded file is not a PDF");
+    console.log("req.file", req.file);
+    if (req.file) {
+      if (req.file.mimetype === "application/pdf") {
+        const encodedPdf = `data:application/pdf;base64,${req.file.buffer.toString(
+          "base64"
+        )}`;
+        result = await cloudinary.uploader.upload(encodedPdf, {
+          resource_type: "image",
+        });
+      } else {
+        throw new Error("Uploaded file is not a PDF");
+      }
     }
+    console.log("resuolt", result);
     profile = new profileInfoModel({
       bio: bio,
-      resume: result?.secure_url || null,
+      resume: result.secure_url || null,
+      portfolio,
       skills,
-      experience: { jobTitle, company, startDate, endDate, description },
+     
       userId,
     });
     await profile.save();
@@ -99,22 +102,19 @@ export const createProfileInfo = async (req, res) => {
       .json({ message: "Profile created successfully", profile });
   } catch (error) {
     console.error("Error creating/updating profile:", error);
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-
 export const getUserProfileInfo = async (req, res) => {
-    try {
-      console.log("started");
-      const userProfile = await profileInfoModel
-        .find({ userId: req.user.id })
-       
-     
-      if (!userProfile) return res.status(200).json(" userProfile not found");
-  
-      return res.status(200).json(userProfile);
-    } catch (error) {
-      return res.status(500).json(error);
-    }
-  };
+  try {
+    console.log("started");
+    const userProfile = await profileInfoModel.find({ userId: req.user.id });
+
+    if (!userProfile) return errorHandler(400, " userProfile not found");
+
+    return res.status(200).json(userProfile);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -5,6 +5,7 @@ import postRoute from './routes/postRoutes.js'
 import projectRoute from './routes/project-route.js'
 import categoryRoute from './routes/category-route.js'
 import profileInfoResume from './routes/profileInfo-route.js'
+import experiencRoute from './routes/exp-route.js'
 import { MONGO_URL } from './config/config.js'
 import { connectToDb } from './config/DbConfig.js'
 import cookieParser from 'cookie-parser'
@@ -29,7 +30,8 @@ app.use('/api/users',userRoute)
 app.use('/api/posts',postRoute)
 app.use('/api/projects',projectRoute)
 app.use('/api/categories',categoryRoute)
-app.use('/api/user',profileInfoResume)
+app.use('/api/profile',profileInfoResume)
+app.use('/api/experience',experiencRoute)
 app.listen(PORT,(req,res)=>{
     console.log(`ápp is running. on port ${PORT}`)
 })

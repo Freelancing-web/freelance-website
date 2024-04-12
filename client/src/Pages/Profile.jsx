@@ -2,50 +2,88 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
-// import { getUserProfile } from "../redux/slices/profile-slice";
-import { Button, Checkbox, Label, Modal, TextInput } from "flowbite-react";
-import { Tabs } from "flowbite-react";
-import { HiAdjustments, HiClipboardList, HiUserCircle } from "react-icons/hi";
-import { MdDashboard } from "react-icons/md";
 import { Link, Route, Routes, useLocation } from "react-router-dom";
 import Test from "../Components/Test";
-import Test2 from "../Components/Test2";
-import Posts from "../Components/Posts/Posts";
-import { BiMessageDetail } from "react-icons/bi";
-import { IoFolderOpenOutline } from "react-icons/io5";
-import Project from "../Components/Project";
-import ProfileIno from "../Components/profileInfo/ProfileIno";
 
+import Posts from "../Components/Posts/Posts";
+
+import Project from "../Components/Project";
+import EditAccount from "../Components/profileInfo/EditAccount";
+import EditProfileInformation from "../Components/profileInfo/EditProfileInformation";
+import {
+  addProfile,
+  addProfileFailied,
+  addProfileInfoStart,
+} from "../redux/slices/profile-slice";
+import EditExperience from "../Components/profileInfo/EditExperience";
+
+import {
+  addExp,
+  addExpFailed,
+  addExpPending,
+} from "../redux/slices/experience-slice";
 export default function Profile() {
+  let { exp } = useSelector((state) => state.exp);
+  console.log("exp", exp[0]);
+ 
+ 
   const location = useLocation();
   const { currentUser } = useSelector((state) => state.user);
-  // const  profileInfo  = useSelector((state) => state.profile.profileInfo);
-  // console.log('Profile info',profileInfo)
+  const info = useSelector((state) => state.profile.profileInfo);
+
   const dispatch = useDispatch();
-  useEffect(()=>{
-    const getUserProfile  = async()=>{
-     try {
-         const {data} = await axios.get('/api/user/user-info')
-       if(data){
-        // dispatch(getProjects())
-       }
-        return data
-     } catch (error) {
-         return error.message
-     }
-    }
-     getUserProfile()
- },[])
+  useEffect(() => {
+    const getUserProfile = async () => {
+      dispatch(addProfileInfoStart());
+      try {
+        const { data } = await axios.get("/api/profile/user-info");
+        if (data) {
+          dispatch(addProfile(data));
+        }
+        return data;
+      } catch (error) {
+        dispatch(addProfileFailied(error));
+      }
+    };
+    const getExp = async () => {
+      dispatch(addExpPending());
+      try {
+        const { data } = await axios.get("api/experience/user-exp");
+        if (data) {
+          dispatch(addExp(data));
+        }
+        return data;
+      } catch (error) {
+        dispatch(addExpFailed(error));
+      }
+    };
+    getExp();
+    getUserProfile()
+  }, [dispatch]);
 
   const [openModal, setOpenModal] = useState(false);
-  const [email, setEmail] = useState("");
+  const [openEdit, setOpenEdit] = useState(false);
+  const [addExpModal, setAddExpModal] = useState(false);
+  console.log("Profile info", info);
 
   const handleOpenModal = () => {
     setOpenModal(true);
   };
-
   const handleCloseModal = () => {
     setOpenModal(false);
+  };
+  const handleExpModal = () => {
+    setAddExpModal(true);
+  };
+  const handleExpClose = () => {
+    setAddExpModal(false);
+  };
+  const handleOpenEdit = () => {
+    setOpenEdit(true);
+  };
+
+  const handleCloseEdit = () => {
+    setOpenEdit(false);
   };
 
   // console.log("profile", profileInfo);
@@ -53,13 +91,13 @@ export default function Profile() {
   const profileImg = "https://source.unsplash.com/random/200x200";
   return (
     <>
-      <div className="container mx-auto bg-[#f1f1f1]  px-4 py-8 max-w-[800px]">
+      <div className=" mx-auto  w-full   px-4 py-8 max-w-[800px]">
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           {/* Cover Photo */}
           <div className="relative">
             {profileImg ? (
               <img
-                src={profileImg}
+                src={currentUser.rest.coverImg}
                 alt="Cover Photo"
                 className="w-full h-[300px] object-cover  object-center"
               />
@@ -69,18 +107,15 @@ export default function Profile() {
           </div>
           {/* Profile Picture */}
           <div className="flex mt-[-60px] z-10 relative  items-center justify-between ">
-            <img
-              src="https://source.unsplash.com/random/200x200"
-              alt="Profile Picture"
-              className="h-[200px] w-[200px] rounded-full border-4 border-white object-contain object-center shadow-lg"
-            />
-            <div className="mr-4 cursor-pointer">
-              <FaEdit
-                size={30}
-                className=""
-                onClick={handleOpenModal}
+            <div className="h-[200px] w-[200px]">
+              <img
+                src={currentUser.rest.photoUrl}
+                alt="Profile Picture"
+                className="  w-full  h-full rounded-full border-4 border-white object-cover object-center shadow-lg"
               />
-              
+            </div>
+            <div className="mr-4 cursor-pointer">
+              <FaEdit size={30} className="" onClick={handleOpenModal} />
             </div>
           </div>
           {/* Profile Info */}
@@ -88,14 +123,14 @@ export default function Profile() {
             <h1 className="text-3xl font-bold text-gray-900">
               {currentUser.rest.username}
             </h1>
-            <p className="text-sm text-gray-600">UI/UX Designer</p>
+            <p className="text-sm text-gray-600">{info.length > 0 ? info[0].bio :"Bio"}</p>
             <button className="bg-blue-500 text-white px-4 py-2 rounded-full mt-2">
               Connect
             </button>
           </div>
           <div className="px-6 py-4">
             <div className="border-b border-gray-200 dark:border-gray-700">
-            <ul className="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400">
+              <ul className="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400">
                 <li className="me-2">
                   <Link
                     to="/profile"
@@ -144,12 +179,11 @@ export default function Profile() {
                     Resume
                   </Link>
                 </li> */}
-
               </ul>
               <Routes>
                 <Route path="/test" element={<Test />} />
                 <Route path="/posts" element={<Posts />} />
-                <Route path="/projects" element={<Project/>} />
+                <Route path="/projects" element={<Project />} />
               </Routes>
             </div>
           </div>
@@ -157,7 +191,16 @@ export default function Profile() {
 
           {location.pathname === "/profile" ? (
             <>
-              <div className="px-6 mt-5 py-4 border-t border-gray-200">
+              <div
+                onClick={handleOpenEdit}
+                className="mr-4 cursor-pointer flex justify-end items-center gap-3 "
+              >
+                <span className="text-blue-500  underline">
+                  Enhance Your Profile
+                </span>
+                <FaEdit className="text-blue-500" size={20} />
+              </div>
+              <div className="px-6 mt-2 py-4 ">
                 <h2 className="text-lg font-semibold mb-2">Summary</h2>
                 <p className="text-sm text-gray-700">
                   Experienced UI/UX designer with a passion for creating
@@ -166,40 +209,60 @@ export default function Profile() {
                 </p>
               </div>
               <div className="px-6 py-4">
-                <h2 className="text-lg font-semibold mb-2">Experience</h2>
-                {/* {profileInfo ? profileInfo[0].experience?.map((exp) => {
-                  console.log("exp", exp);
-                  return (
-                    <>
-                      <h3 className="text-md font-semibold">{exp.jobTitle}</h3>
-                      <p className="text-sm text-gray-700">{exp.company}</p>
-                      <p className="text-sm text-gray-700">
-                        {exp.startDate} - {exp.endDate}
-                      </p>
-                    </>
-                  );
-                }):"No Profile"} */}
+                <div className="flex justify-between items-center">
+                  <h2 className="text-lg font-semibold mb-2">Experience</h2>
+                  <FaEdit
+                    className="cursor-pointer"
+                    size={30}
+                    onClick={handleExpModal}
+                  />
+                  {
+                    // info.length > 0 ? info[0].experience.length > 0 && info[0].experience.length >0 ? (
+                    //   <FaEdit size={30} className="" onClick={handleExpModal} />
+                    // ):("no exp")
+                    // :
+                  }
+                </div>
+             
 
-                {/* Add more experience sections as needed */}
+                {exp.length > 0
+                  ? exp[0].experience.map((data,index) => {
+                    console.log(data)
+                  
+                      return (
+                  
+                        <div key={index} className="mb-4">
+                          <div className="text-md font-semibold flex items-center justify-between">
+                            {data.jobTitle}
+      
+                          </div>
+                          <p className="text-sm text-gray-700">{data.company}</p>
+                          <p className="text-sm text-gray-700">
+                            {data.startDate} - {data.endDate}
+                          </p>
+                        </div>
+                      );
+                    })
+                  : "NO Experience"}
               </div>
               {/* Skills */}
+         
               <div className="px-6 py-4">
                 <h2 className="text-lg font-semibold mb-2">Skills</h2>
-                <div className="flex flex-wrap">
-                  {/* Add more skills tags as needed */}
-                  <span className="bg-gray-200 text-sm px-2 py-1 rounded-full mr-2 mb-2">
-                    {/* { profileInfo[0] ? profileInfo[0]?.skills[0] :"NO Profile"} */}
+                {info.length > 0 ? (
+               JSON.parse(info[0].skills).map((data)=>{
+                  return (
+                    <span className="bg-gray-200 text-sm px-2 py-1 rounded-full mr-2 mb-2">
+                   {data}
                   </span>
-                  <span className="bg-gray-200 text-sm px-2 py-1 rounded-full mr-2 mb-2">
-                    UX Design
-                  </span>
-                  <span className="bg-gray-200 text-sm px-2 py-1 rounded-full mr-2 mb-2">
-                    Adobe XD
-                  </span>
-                </div>
+                  )
+                })
+
+              ):("No Skills Yet")}
+                
               </div>
               {/* Contact Information */}
-              <div className="px-6 py-4">
+              <div className="px-6 py-2">
                 <h2 className="text-lg font-semibold mb-2">Contact</h2>
                 <p className="text-sm text-gray-700">
                   Email: {currentUser.rest.email}
@@ -214,9 +277,19 @@ export default function Profile() {
           {/* Experience */}
         </div>
       </div>
-      <ProfileIno open={openModal} handleCloseModal={handleCloseModal} openModel={openModal} />
-
-    
+      <EditAccount
+        // open={openModal}
+        handleCloseModal={handleCloseModal}
+        openModel={openModal}
+      />
+      <EditProfileInformation
+        openEdit={openEdit}
+        handleCloseEdit={handleCloseEdit}
+      />
+      <EditExperience
+        addExpModal={addExpModal}
+        handleExpClose={handleExpClose}
+      />
     </>
   );
 }

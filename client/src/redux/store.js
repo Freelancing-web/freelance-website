@@ -4,13 +4,17 @@ import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import projectSlice from "./project-slice";
 import PostSlice from "./slices/Post-slice";
-// import profileSlice from "./slices/profile-slice";
+import profileSlice from "./slices/profile-slice";
+import experienceSlice from "./slices/experience-slice";
+import themeSlice from "./slices/theme-slice";
 
 const rootReducer = combineReducers({
   user: userSlice,
   project: projectSlice,
-  post: PostSlice
-  // profile: profileSlice,
+  post: PostSlice,
+  profile: profileSlice,
+  exp:experienceSlice,
+  theme:themeSlice
 });
 const persistConfig = {
   key: "root2",

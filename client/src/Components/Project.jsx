@@ -12,7 +12,7 @@ import ProjectCard from "./projects/ProjectCard";
 export default function Project() {
   let { projects, loading, error } = useSelector((state) => state.project);
   const dispatch = useDispatch();
-  projects = []
+
  
   useEffect(() => {
     const getData = async () => {
