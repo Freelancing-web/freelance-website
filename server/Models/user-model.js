@@ -22,25 +22,24 @@ const userSchema = new Schema(
       required: true,
       validate: [
         {
-          validator:  value=>  validator.isStrongPassword(value),
+          validator: (value) => validator.isStrongPassword(value),
           message:
             "Password Must be at least One Character,alphanumeric and number ",
         },
       ],
     },
-    role:{
-      type:String, 
-      default:'freelancer'
+    role: {
+      type: String,
+      default: "freelancer",
     },
-    photoUrl:{
-      type:String,
-      default: "https://source.unsplash.com/random/200x200" || null
+    profileImg: {
+      type: String,
+      default: null,
     },
-    coverImg:{
-      type:String,
-      default: "https://source.unsplash.com/random/200x200" || null
-    }
-    
+    coverImg: {
+      type: String,
+      defualt: null,
+    },
   },
   {
     timestamps: true,
@@ -48,11 +47,9 @@ const userSchema = new Schema(
 );
 // pre  waxa la fulinaa intaa insert , update , save la dihin
 
-
 userSchema.pre("save", async function (next) {
-
   if (!this.isModified("password")) {
-      return next();
+    return next();
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -62,7 +59,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.comparePassword = async function (givenPassword) {
-  console.log('password',givenPassword)
+  console.log("password", givenPassword);
   return await bcrypt.compare(givenPassword, this.password);
 };
 

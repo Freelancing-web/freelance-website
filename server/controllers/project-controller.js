@@ -145,3 +145,27 @@ export const getUserProjects = async (req, res) => {
       
     }
   };
+
+  
+export const allProjects = async (req, res) => {
+  try {
+    console.log("started");
+    const posts = await projectModel
+      .find()
+      .populate({
+        path: "author",
+        model: "User",
+      }).populate({
+          path:'category',
+          model:'Category'
+      })
+      .sort({ createdAt: -1 });
+    if (!posts) return res.status(200).json("User Prrojects not found");
+
+    return res.status(200).json(posts);
+  } catch (error) {
+    return res.status(500).json(error);
+
+    
+  }
+};
