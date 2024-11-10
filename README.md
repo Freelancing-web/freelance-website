@@ -8,7 +8,7 @@ SF is a platform that connects businesses with freelancers, aiming to streamline
 ## Features
 
 ### Authentication:
-- **Login Feature:**
+- **`Login Feature`:**
   - Users can log in via username, email, or Google authentication.
 - **Logout Feature:**
   - Users can securely log out of the website.
